@@ -92,7 +92,7 @@ const EdgeRenderer = ({
               const [sourceNodeRect, sourceHandleBounds, sourceIsValid] = getNodeData(nodeInternals.get(edge.source));
               const [targetNodeRect, targetHandleBounds, targetIsValid] = getNodeData(nodeInternals.get(edge.target));
 
-              if (!sourceIsValid || !targetIsValid) {
+              if (!sourceIsValid && !targetIsValid) {
                 return null;
               }
 
@@ -107,10 +107,10 @@ const EdgeRenderer = ({
               // when connection type is loose we can define all handles as sources and connect source -> source
               const targetNodeHandles =
                 connectionMode === ConnectionMode.Strict
-                  ? targetHandleBounds!.target
-                  : (targetHandleBounds!.target ?? []).concat(targetHandleBounds!.source ?? []);
-              const sourceHandle = getHandle(sourceHandleBounds!.source!, edge.sourceHandle);
-              const targetHandle = getHandle(targetNodeHandles!, edge.targetHandle);
+                  ? targetHandleBounds?.target || []
+                  : (targetHandleBounds?.target || []).concat(targetHandleBounds?.source || []);
+              const sourceHandle = getHandle(sourceHandleBounds?.source || [], edge.sourceHandle);
+              const targetHandle = getHandle(targetNodeHandles || [], edge.targetHandle);
               const sourcePosition = sourceHandle?.position || Position.Bottom;
               const targetPosition = targetHandle?.position || Position.Top;
               const isFocusable = !!(edge.focusable || (edgesFocusable && typeof edge.focusable === 'undefined'));
@@ -119,11 +119,6 @@ const EdgeRenderer = ({
                 typeof onReconnect !== 'undefined' &&
                 (edgeReconnectable || (edgesUpdatable && typeof edgeReconnectable === 'undefined'));
 
-              if (!sourceHandle || !targetHandle) {
-                onError?.('008', errorMessages['error008'](sourceHandle, edge));
-
-                return null;
-              }
 
               const { sourceX, sourceY, targetX, targetY } = getEdgePositions(
                 sourceNodeRect,
