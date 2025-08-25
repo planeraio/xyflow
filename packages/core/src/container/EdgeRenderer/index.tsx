@@ -93,8 +93,8 @@ const EdgeRenderer = ({
               const [targetNodeRect, targetHandleBounds, targetIsValid] = getNodeData(nodeInternals.get(edge.target));
 
               const bothNodesInvalid = !sourceIsValid && !targetIsValid;
-              const oneNodeInvalid = !sourceIsValid || !targetIsValid;
-              const edgeInvalid = onlyRenderVisibleElements ? bothNodesInvalid : oneNodeInvalid;
+              const eitherNodeInvalid = !sourceIsValid || !targetIsValid;
+              const edgeInvalid = onlyRenderVisibleElements ? bothNodesInvalid : eitherNodeInvalid;
               if (edgeInvalid) {
                 return null;
               }
@@ -122,7 +122,11 @@ const EdgeRenderer = ({
                 typeof onReconnect !== 'undefined' &&
                 (edgeReconnectable || (edgesUpdatable && typeof edgeReconnectable === 'undefined'));
 
-              if (edgeInvalid) {
+              const bothHandlesMissing = !sourceHandle && !targetHandle;
+              const eitherHandleMissing = !sourceHandle || !targetHandle;
+              const handleError = onlyRenderVisibleElements ? bothHandlesMissing : eitherHandleMissing;
+
+              if (handleError) {
                 onError?.('008', errorMessages['error008'](sourceHandle, edge));
 
                 return null;
